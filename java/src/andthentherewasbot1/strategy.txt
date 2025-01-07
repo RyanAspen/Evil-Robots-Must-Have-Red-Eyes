@@ -1,0 +1,6 @@
+This is the first attempt at a bot for the competition. As of now, soldiers are the name of the game. The strategy right now is
+- Produce a random mix of soldiers and moppers
+- Soldiers randomly search for enemy towers and ruins and destroy/develop them
+- Moppers randomly search and steal paint whenever possible and give extra paint to allies
+
+This is really basic, but its a start.

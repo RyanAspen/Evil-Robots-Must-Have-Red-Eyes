@@ -1,0 +1,26 @@
+Now that we have basics down, this version will focus on communication. Bots will communicate info to towers and vice versa. These are
+the message types for now:
+- PaintRequest
+    * Sent by a bot if it is low on paint or by a tower if it knows a near bot is low on paint
+    * OpCode = 0
+    * Fields: ID that needs paint
+- DroughtSignal
+    * Sent by a tower if it detects many PaintRequest messages
+    * OpCode = 1
+    * Fields: None
+- PossibleTowerLocSignal
+    * Sent by a tower if it thinks an enemy tower is at a particular location (symmetry)
+    * OpCode = 2
+    * Fields: Tower location
+- ConfirmedTowerLocSignal
+    * Sent by a tower if it knows an enemy tower is at a particular location or by a bot if it knows an enemy tower is at a particular location
+    * OpCode = 3
+    * Fields: Tower location
+- FloodSignal
+    * Sent by a tower if all of the bots nearby have a lot of paint
+    * OpCode = 4
+    * Fields: None
+- RuinLocSignal
+    * Sent by a tower or bot if it knows a ruins location
+    * OpCode = 5
+    * Fields: Ruins Location

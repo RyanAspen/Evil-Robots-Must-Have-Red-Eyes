@@ -1,9 +1,9 @@
-package andthentherewasbot1;
+package worldwideweb2;
 
 
 import java.util.Objects;
 
-public class Logger extends Globals{
+public class Logger extends Globals {
 
     public static String s = "";
 

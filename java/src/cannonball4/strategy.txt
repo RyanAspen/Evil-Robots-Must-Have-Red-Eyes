@@ -1,0 +1,9 @@
+Now that there's something relatively stable, let's make it unstable! The focus now will be the implementation of splashers.
+
+Splashers should only be created after the early rounds and when we have a fair amount of paint to spare.
+
+Splashers should focus on efficiently painting new zones.
+- Tiles near friendly towers are off limits
+- An empty tile is good, an enemy tile is better, and tiles with towers on them are better yet!
+
+Splashers shouldn't attack if the best attack isn't worth the paint spent on it

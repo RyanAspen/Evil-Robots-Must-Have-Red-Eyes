@@ -1,0 +1,3 @@
+The last version was much better than version 1. This version
+uses an improved micro approach along with fixes related to balance patches. It
+also makes use of resource patterns. Micro should be further scrutinized in future versions.

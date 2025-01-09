@@ -172,4 +172,33 @@ public class CombatMicro extends Globals {
             Logger.addToIndicatorString("Mop Swing West");
         }
     }
+
+    /*
+    public static void splasherAttack() throws GameActionException {
+        if (!rc.isActionReady()) return;
+        MapInfo target = null;
+        MapInfo[] possibleOptions = rc.senseNearbyMapInfos(rc.getType().actionRadiusSquared);
+        for (MapInfo option : possibleOptions)
+        {
+            if (!rc.canAttack(option.getMapLocation())) continue;
+            target = splasherCompare(target, option);
+        }
+        if (target == null) return;
+        if (rc.canAttack(target.getMapLocation()))
+        {
+            Logger.addToIndicatorString("Micro: Attacking " + target.getMapLocation());
+            rc.attack(target.getMapLocation());
+        }
+        else
+        {
+            Logger.addToIndicatorString("Micro: Cannot Attack " + target.getMapLocation());
+        }
+    }
+
+    public static MapInfo splasherCompare(MapInfo A, MapInfo B)
+    {
+
+    }
+
+     */
 }

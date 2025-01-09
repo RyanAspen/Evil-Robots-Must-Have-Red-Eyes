@@ -15,6 +15,7 @@ public class Micro extends Globals {
     private static MovementMicro movementMicro = new MovementMicro(rc);
 
     public static void soldierMicro() throws GameActionException {
+        declutter();
         if (rc.senseNearbyRobots(-1, opponentTeam).length == 0) return;
         CombatMicro.soldierAttack();
         canMove = movementMicro.microMove(canMove);
@@ -22,10 +23,17 @@ public class Micro extends Globals {
     }
 
     public static void mopperMicro() throws GameActionException {
+        declutter();
         if (rc.senseNearbyRobots(-1, opponentTeam).length == 0) return;
         CombatMicro.mopperAttack();
         canMove = movementMicro.microMove(canMove);
         CombatMicro.mopperAttack();
+    }
+
+    public static void splasherMicro() throws GameActionException {
+        declutter();
+        if (rc.senseNearbyRobots(-1, opponentTeam).length == 0) return;
+        canMove = movementMicro.microMove(canMove);
     }
 
     public static void tryCompleteTowerPattern() throws GameActionException {
@@ -51,7 +59,8 @@ public class Micro extends Globals {
     }
 
     public static void refuel() throws GameActionException {
-        if (rc.getPaint() >= rc.getType().paintCapacity * 0.2) return;
+        if (rc.getPaint() >= rc.getType().paintCapacity * 0.2 && rc.getType() != UnitType.SPLASHER) return;
+        if (rc.getPaint() >= rc.getType().attackCost + 50 && rc.getType() == UnitType.SPLASHER) return;
         //Search for nearby towers to refuel at
         int amountToRefuel = rc.getType().paintCapacity - rc.getPaint();
         if (amountToRefuel > 100)
@@ -101,92 +110,15 @@ public class Micro extends Globals {
         }
     }
 
-    public static void kite() throws GameActionException {
-        if (!rc.isMovementReady()) return;
+    public static void declutter() throws GameActionException {
+        //If we are low on paint, there are many allies nearby, and we haven't moved recently, destroy the bot
+        return;
+        /*
+        if (rc.getType().isTowerType()) return;
+        if (rc.getPaint() > rc.getType().attackCost) return;
+        if (rc.senseNearbyRobots(2, myTeam).length < 7) return;
+        rc.disintegrate();
 
-        //Avoid the attack radius of towers if possible. Tiebreaker is paint alignment
-
-        RobotInfo[] enemies = rc.senseNearbyRobots(-1,opponentTeam);
-        if (enemies.length == 0) return;
-
-
-        MapLocation[] tempNearLocs = new MapLocation[9];
-        int c = 0;
-        for (int i = 0; i < allDirections.length; i++)
-        {
-            if (rc.canMove(allDirections[i]))
-            {
-                tempNearLocs[c] = rc.getLocation().add(allDirections[i]);
-                c++;
-            }
-        }
-        MapLocation[] nearLocs = new MapLocation[c];
-        System.arraycopy(tempNearLocs, 0, nearLocs, 0 , c);
-
-        int minTowers = 1000;
-        int paint = -1;
-        MapLocation target = null;
-        for (int j = 0; j < nearLocs.length; j++)
-        {
-            int towers = 0;
-            for (int i = 0; i < enemies.length; i++)
-            {
-                if (!enemies[i].getType().isTowerType()) continue;
-                if (nearLocs[j].isWithinDistanceSquared(enemies[i].getLocation(), enemies[i].getType().actionRadiusSquared))
-                {
-                    towers++;
-                }
-            }
-            if (towers < minTowers)
-            {
-                minTowers = towers;
-                target = nearLocs[j];
-                PaintType paintType = rc.senseMapInfo(nearLocs[j]).getPaint();
-                if (paintType.isAlly())
-                {
-                    paint = 1;
-                }
-                else if (paintType == PaintType.EMPTY)
-                {
-                    paint = 0;
-                }
-                else
-                {
-                    paint = -1;
-                }
-            }
-            else if (towers == minTowers)
-            {
-                PaintType paintType = rc.senseMapInfo(nearLocs[j]).getPaint();
-                int paint2;
-                if (paintType.isAlly())
-                {
-                    paint2 = 1;
-                }
-                else if (paintType == PaintType.EMPTY)
-                {
-                    paint2 = 0;
-                }
-                else
-                {
-                    paint2 = -1;
-                }
-                if (paint < paint2)
-                {
-                    paint = paint2;
-                    target = nearLocs[j];
-                }
-            }
-        }
-        if (target != null && target != rc.getLocation())
-        {
-            if (canMove) {
-                rc.move(rc.getLocation().directionTo(target));
-            }
-        }
-        else
-        {
-            canMove = false;
-        }
+         */
     }
 }

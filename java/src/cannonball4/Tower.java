@@ -19,6 +19,20 @@ public class Tower extends Globals
 
     public static MapLocation[] attackableLocs = null;
 
+    public static int numSoldiersBuilt = 0;
+    public static int numMoppersBuilt = 0;
+    public static int numSplashersBuilt = 0;
+    public static final double IDEAL_SOLDIERS_RATIO = 0.4;
+    public static final double IDEAL_MOPPERS_RATIO = 0.5;
+    public static final double IDEAL_SPLASHERS_RATIO = 0.1;
+
+    public static final int PAINT_TO_SAVE_DEFEND = UnitType.MOPPER.paintCost;
+    public static final int MONEY_TO_SAVE_DEFEND = UnitType.MOPPER.moneyCost * 2;
+
+    public static final int PAINT_TO_SAVE_BUILD = UnitType.LEVEL_ONE_PAINT_TOWER.paintCost;
+    public static final int MONEY_TO_SAVE_BUILD = UnitType.LEVEL_ONE_PAINT_TOWER.moneyCost;
+
+
     public static void init(RobotController rc) throws GameActionException {
         Globals.init(rc);
         location = rc.getLocation();
@@ -77,58 +91,171 @@ public class Tower extends Globals
         System.arraycopy(tempAttackableLocs, 0, attackableLocs, 0, i);
     }
 
-    public static void run() throws GameActionException {
-        tryUpgrade();
+    //If we see enemies early on, build a mopper to protect the tower (meant for anti-zerg rush tactics)
 
-        //Try to build soldiers
-        int paint = rc.getPaint();
-        int chips = rc.getMoney();
-        if (chips > 1000 || rc.getRoundNum() < 10) {
-            if (rng.nextBoolean()) {
-                if (paint >= UnitType.SOLDIER.paintCost && chips >= UnitType.SOLDIER.moneyCost) {
-                    for (int i = 0; i < spawnLocs.length; i++) {
-                        if (rc.canBuildRobot(UnitType.SOLDIER, spawnLocs[i])) {
-                            rc.buildRobot(UnitType.SOLDIER, spawnLocs[i]);
+    //This isn't good enough. The soldiers destroy the starting towers too quickly. TODO
+    public static void defend() throws GameActionException {
+        if (rc.getRoundNum() > 100) return;
+        if (rc.getMoney() < UnitType.MOPPER.moneyCost || rc.getPaint() < UnitType.MOPPER.paintCost) return;
+        RobotInfo[] enemyBots = rc.senseNearbyRobots(-1, opponentTeam);
+        if (enemyBots.length == 0) return;
+        attemptSpawn(UnitType.MOPPER);
+    }
+
+    public static int getPaintToSave()
+    {
+        int paintToSave = PAINT_TO_SAVE_BUILD;
+        if (rc.getRoundNum() < 10 && rc.getType() == UnitType.LEVEL_ONE_PAINT_TOWER)
+        {
+            return 0;
+        }
+        if (rc.getRoundNum() < 100)
+        {
+            paintToSave += PAINT_TO_SAVE_DEFEND;
+        }
+
+        return paintToSave;
+    }
+
+    public static int getMoneyToSave()
+    {
+        int moneyToSave = MONEY_TO_SAVE_BUILD;
+        if (rc.getRoundNum() < 10)
+        {
+            return 0;
+        }
+        else if (rc.getRoundNum() < 100)
+        {
+            moneyToSave += MONEY_TO_SAVE_DEFEND;
+        }
+        return moneyToSave;
+    }
+
+    public static void attemptSpawn(UnitType type) throws GameActionException {
+        RobotInfo[] enemyBots = rc.senseNearbyRobots(-1, opponentTeam);
+        if (enemyBots.length == 0)
+        {
+            for (int i = 0; i < spawnLocs.length; i++) {
+                if (rc.canBuildRobot(type, spawnLocs[i])) {
+                    rc.buildRobot(type, spawnLocs[i]);
+                    switch (type)
+                    {
+                        case SOLDIER:
+                            numSoldiersBuilt++;
                             break;
-                        }
+                        case SPLASHER:
+                            numSplashersBuilt++;
+                            break;
+                        case MOPPER:
+                            numMoppersBuilt++;
+                            break;
                     }
+                    break;
                 }
-            } else {
-                if (paint >= UnitType.MOPPER.paintCost && chips >= UnitType.MOPPER.moneyCost) {
-                    for (int i = 0; i < spawnLocs.length; i++) {
-                        if (rc.canBuildRobot(UnitType.MOPPER, spawnLocs[i])) {
-                            rc.buildRobot(UnitType.MOPPER, spawnLocs[i]);
-                            break;
-                        }
-                    }
+            }
+            return;
+        }
+
+        RobotInfo closestEnemy = enemyBots[0];
+        int minDist = 100000;
+        for (int i = 1; i < enemyBots.length; i++)
+        {
+            int dist = enemyBots[i].getLocation().distanceSquaredTo(location);
+            if (dist < minDist)
+            {
+                minDist = dist;
+                closestEnemy = enemyBots[i];
+            }
+        }
+
+        //Try to spawn as close as possible to the closest enemy
+        minDist = 100000;
+        MapLocation bestSpawn = null;
+        for (int i = 0; i < spawnLocs.length; i++) {
+            if (rc.canBuildRobot(type, spawnLocs[i])) {
+                int dist = spawnLocs[i].distanceSquaredTo(closestEnemy.getLocation());
+                if (dist < minDist)
+                {
+                    minDist = dist;
+                    bestSpawn = spawnLocs[i];
+
                 }
             }
         }
+        if (bestSpawn != null)
+        {
+            rc.buildRobot(type, bestSpawn);
+            switch (type)
+            {
+                case SOLDIER:
+                    numSoldiersBuilt++;
+                    break;
+                case SPLASHER:
+                    numSplashersBuilt++;
+                    break;
+                case MOPPER:
+                    numMoppersBuilt++;
+                    break;
+            }
+        }
+    }
+
+    public static UnitType chooseBotToBuildNext()
+    {
+        int totalBotsBuilt = numMoppersBuilt + numSoldiersBuilt + numSplashersBuilt;
+        double currentRatioMopper = (double) numMoppersBuilt / totalBotsBuilt;
+        double currentRatioSoldier = (double) numSoldiersBuilt / totalBotsBuilt;
+        double currentRatioSplasher = (double) numSplashersBuilt / totalBotsBuilt;
+        double mopperRatioDiff = IDEAL_MOPPERS_RATIO - currentRatioMopper;
+        double soldierRatioDiff = IDEAL_SOLDIERS_RATIO - currentRatioSoldier;
+        double splasherRatioDiff = IDEAL_SPLASHERS_RATIO - currentRatioSplasher;
+        if (mopperRatioDiff > soldierRatioDiff && mopperRatioDiff > splasherRatioDiff) return UnitType.MOPPER;
+        if (soldierRatioDiff > mopperRatioDiff && soldierRatioDiff > splasherRatioDiff) return UnitType.SOLDIER;
+        if (splasherRatioDiff > mopperRatioDiff && splasherRatioDiff > soldierRatioDiff && rc.getRoundNum() > 100) return UnitType.SPLASHER;
+        return UnitType.SOLDIER;
+    }
+
+    public static void run() throws GameActionException {
+        defend();
+        tryUpgrade();
+
+        //Try to build soldiers
+        int paintToSpend = rc.getPaint() - getPaintToSave();
+        int chipsToSpend = rc.getMoney() - getMoneyToSave();
+
+        UnitType botToBuild = chooseBotToBuildNext();
+        if (paintToSpend >= botToBuild.paintCost && chipsToSpend >= botToBuild.moneyCost) attemptSpawn(botToBuild);
 
         if (rc.isActionReady()) {
             //Attack enemy bots
             RobotInfo[] enemyBots = rc.senseNearbyRobots(rc.getType().actionRadiusSquared, opponentTeam);
+            if (enemyBots.length == 0) return;
 
-            if (enemyBots.length > 2)
-            {
-                //AOE ATTACK
-                rc.attack(null);
-                return;
-            }
-
-            //REGULAR ATTACK: For now, just attack the weakest enemy
-            int lowestHealth = 1000;
+            int lowestHealth = 100000;
+            int secondLowestHealth = 100000;
             MapLocation target = null;
             for (int i = 0; i < enemyBots.length; i++) {
                 int health = enemyBots[i].getHealth();
                 if (health < lowestHealth) {
+                    secondLowestHealth = lowestHealth;
                     lowestHealth = health;
                     target = enemyBots[i].getLocation();
+                }
+                else if (health < secondLowestHealth)
+                {
+                    secondLowestHealth = health;
                 }
             }
             if (target != null)
             {
-                rc.attack(target);
+                //If we can destroy more than 1 unit at once, use AOE
+                if (secondLowestHealth <= rc.getType().aoeAttackStrength) rc.attack(null);
+                //If we can destroy a unit directly, use normal attack
+                else if (lowestHealth <= rc.getType().attackStrength) rc.attack(target);
+                //If there are many enemies in range, use AOE
+                else if (enemyBots.length > 4) rc.attack(null);
+                //Otherwise, regular attack the best target
+                else rc.attack(target);
             }
         }
     }

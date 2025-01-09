@@ -7,3 +7,13 @@ Splashers should focus on efficiently painting new zones.
 - An empty tile is good, an enemy tile is better, and tiles with towers on them are better yet!
 
 Splashers shouldn't attack if the best attack isn't worth the paint spent on it
+
+Misc. Notes:
+
+CURRENT MOPPER MICRO IS A BIT TOO SLOW
+
+- Update micro to be more aggressive against towers if we have an advantage
+- Choose tower patterns based on a guess as to which resource we need more of (not random)
+- Spawn soldiers/moppers based on a set proportion estimated from what has been spawned before and/or what units are visible DONE
+- Towers need to defend against a Zerg Rush  DONE
+* In the first 100 rounds, keep at least enough resources to make a mopper at each tower. A tower builds 1 mopper if it sees enemies during this time period DONE

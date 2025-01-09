@@ -3,71 +3,27 @@ package cannonball4;
 import battlecode.common.*;
 
 public class MovementMicro{
+
+    static boolean isAggro = false;
     static MicroInfo[] microInfos = null;
     static RobotController rc;
 
     public static Direction[] allDirections = Direction.values();
-    static final int MAX_MICRO_BYTECODE_REMAINING = 5000;
+    static final int MAX_MICRO_BYTECODE_REMAINING = 4000; //5000
 
     public MovementMicro(RobotController rc)
     {
-        this.rc = rc;
+        MovementMicro.rc = rc;
     }
 
-    /*
-    public void micro() throws GameActionException {
-        if (rc.senseNearbyRobots(-1, rc.getTeam().opponent()).length == 0) return;
-        preprocessMicro();
-        MapLocation bestTarget = null;
-        if (rc.isActionReady())
-        {
-            bestTarget = getTarget();
-        }
-        if (bestTarget != null)
-        {
-            PaintManager.soldierAttack(bestTarget);
-        }
-        Direction bestDir = null;
-        if (rc.isMovementReady())
-        {
-            bestDir = getMovement();
-        }
-        if (bestDir == null || bestDir == Direction.CENTER) return;
-        rc.move(bestDir);
-        if (rc.isActionReady())
-        {
-            bestTarget = getTarget();
-        }
-        if (bestTarget != null)
-        {
-            PaintManager.soldierAttack(bestTarget);
-        }
-    }
-
-    public MapLocation getTarget() throws GameActionException {
-        MicroInfo bestMicro = microInfos[0];
-        for (int i = 1; i < microInfos.length; i++)
-        {
-            if (microInfos[i].isBetterTarget(bestMicro)) bestMicro = microInfos[i];
-        }
-        if (bestMicro.canAttack()) return bestMicro.loc;
-        return null;
-    }
-
-    public Direction getMovement()
-    {
-        MicroInfo bestMicro = microInfos[0];
-        for (int i = 1; i < microInfos.length; i++)
-        {
-            if (microInfos[i].isBetterMove(bestMicro)) bestMicro = microInfos[i];
-        }
-        if (bestMicro.canMoveM) return bestMicro.dir;
-        return null;
-    }
-     */
     public boolean microMove(boolean canMove) throws GameActionException {
         if (!rc.isMovementReady() || !canMove) return false;
         preprocessMicro();
+        isAggro = (rc.senseNearbyRobots(-1, rc.getTeam()).length > rc.senseNearbyRobots(-1,rc.getTeam().opponent()).length + 3);
+        if (!isAggro && rc.getType() == UnitType.SPLASHER)
+        {
+            isAggro = rc.getPaint() >= rc.getType().attackCost*3;
+        }
         MicroInfo bestMove = microInfos[0];
         for (int i = 1; i < microInfos.length; i++)
         {
@@ -81,6 +37,8 @@ public class MovementMicro{
         }
         else if (bestMove != null && bestMove.dir == Direction.CENTER) //TODO: Results in no movement sometimes
         {
+            Logger.addToIndicatorString("Micro: Stay Put" + bestMove.loc);
+            Logger.addToIndicatorString(String.valueOf(bestMove.safe()));
             return false;
         }
         Logger.addToIndicatorString("Micro: Not Moving");
@@ -102,6 +60,7 @@ public class MovementMicro{
             }
         }
         RobotInfo[] allBots = rc.senseNearbyRobots();
+
         for (int i = 0; i < allBots.length; i++)
         {
             if (Clock.getBytecodesLeft() < MAX_MICRO_BYTECODE_REMAINING) break;
@@ -170,7 +129,7 @@ public class MovementMicro{
             this.dir = dir;
             this.loc = rc.getLocation().add(dir);
             this.startingPaint = rc.senseMapInfo(this.loc).getPaint();
-            if (dir != Direction.CENTER || !rc.canMove(dir)) this.canMoveM = false;
+            if (!rc.canMove(dir)) this.canMoveM = false;
             RobotInfo bot = rc.senseRobotAtLocation(loc);
             this.containsEnemy = (bot != null) && !bot.getTeam().isPlayer();
         }
@@ -247,12 +206,14 @@ public class MovementMicro{
         {
             if (!canMoveM) return -1;
 
+            if (isAggro) return 0;
+
             //Very unsafe
             if (paintLossForBot > 2) return 0;
             if (4*DPS > rc.getHealth()) return 0;
 
             //Moderately unsafe
-            if (paintLossForBot > 0) return 1;
+            if (paintLossForBot > 0 && !isAggro) return 1;
             if (numEnemies > numAllies) return 1;
             if (DPS > 0) return 1;
 
@@ -272,6 +233,12 @@ public class MovementMicro{
         {
             if (safe() > M.safe()) return true;
             if (safe() < M.safe()) return false;
+
+            if (isAggro)
+            {
+                if (minDistToEnemy < M.minDistToEnemy) return true;
+                if (minDistToEnemy > M.minDistToEnemy) return false;
+            }
 
             if (paintLossForBot < M.paintLossForBot) return true;
             if (paintLossForBot > M.paintLossForBot) return false;

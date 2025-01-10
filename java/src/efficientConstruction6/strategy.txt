@@ -1,0 +1,23 @@
+The goals of this version are:
+
+- Add towerPatternToComplete, which gives the unitType corresponding to
+the pattern centered at the given ruin, or null if none exist
+DONE
+
+TODO (Will save for another version)
+- Incorporate the above method into Soldier logic
+
+
+- Update pathfinding to be similar to GoneFishin's 2023 pathfinding code except:
+    * SOLDIER
+        - If the current tile is an empty tile and we have at least 3 towers,
+        wait until we can attack the tile.
+        - Treat enemy tiles as walls
+    * MOPPER
+        - If the current tile is an enemy tile, wait until we can mop the tile
+    * SPLASHER
+        - Treat non-allied tiles as walls
+DONE
+
+DONE
+When approaching ruins, use simple pathfinding instead of the fancy version.

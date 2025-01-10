@@ -1,0 +1,7 @@
+This is a smaller update focused on what towers to make.
+
+If we are early game, have a bias towards paint towers.
+
+If there are multiple enemies in view and we're past the early game, build defense tower.
+
+Also, early setup was changed

@@ -1,0 +1,7 @@
+This version is meant to account for rush strategies that could be common for the Sprint 1 tournament and on easier maps.
+
+The counter strategy is as follows:
+- Each tower spawns a soldier ASAP
+- The soldier starts by marking its spawn tower with the correct pattern.
+- When an enemy is seen by a starting tower, spawn a mopper as close as possible to the enemy as well as a soldier.
+- The existing code should do the rest (pressure the attackers as much as possible and rebuild towers destroyed by the aggressors)

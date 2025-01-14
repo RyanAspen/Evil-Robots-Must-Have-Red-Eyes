@@ -1,4 +1,4 @@
-package bloonsTowerDefense9;
+package playpathfinder10;
 
 import battlecode.common.*;
 
@@ -6,7 +6,7 @@ import battlecode.common.*;
 Moppers should move as follows:
 - If low on health, prefer being further from enemy towers
 - Stay off of enemy tiles if possible, especially when there's adjacent allies
-- Stay off of neutral tiles if possible
+- Stay off of neutral tiles unless an enemy tile that we can attack is close by
 - Get close to enemies if we have a numbers advantage. Otherwise, don't prioritize it.
 
 Info we need:
@@ -19,12 +19,11 @@ Info we need:
 
  */
 
-public class MicroInfoSplasher {
+public class MicroInfoMopper {
     Direction dir;
     MapLocation loc;
-
-    int minDistToEnemy = 100000;
     int minDistToTower = 100000;
+    double DPS = 0;
     int paintLossForBot = 0;
     int numAdjacentAllies = 1;
     boolean canMoveM;
@@ -32,7 +31,9 @@ public class MicroInfoSplasher {
     MapInfo info;
     boolean lowHealth;
 
-    public MicroInfoSplasher(MapLocation loc, Direction dir, MapInfo info, boolean isLowHealth, boolean canMoveM) {
+    public boolean isEnemyPaintNear, isEnemyPaintWithMarkNear;
+
+    public MicroInfoMopper(MapLocation loc, Direction dir, MapInfo info, boolean isLowHealth, boolean isEnemyPaintNear, boolean isEnemyPaintWithMarkNear, boolean canMoveM) {
         this.dir = dir;
         this.loc = loc;
         this.info = info;
@@ -46,6 +47,8 @@ public class MicroInfoSplasher {
             this.paintType = info.getPaint();
         }
         this.canMoveM = canMoveM;
+        this.isEnemyPaintNear = isEnemyPaintNear;
+        this.isEnemyPaintWithMarkNear = isEnemyPaintWithMarkNear;
     }
 
     void updateAlly(RobotInfo unit)
@@ -53,13 +56,6 @@ public class MicroInfoSplasher {
         if (loc == null) return;
         int dist = unit.getLocation().distanceSquaredTo(loc);
         if (dist <= 2) numAdjacentAllies++;
-    }
-
-    void updateEnemy(RobotInfo unit)
-    {
-        if (loc == null) return;
-        int dist = unit.getLocation().distanceSquaredTo(loc);
-        if (dist < minDistToEnemy) minDistToEnemy = dist;
     }
 
     void updatePaint() {
@@ -83,13 +79,13 @@ public class MicroInfoSplasher {
     int safe()
     {
         if (!canMoveM) return -9999;
-        if (!paintType.isAlly()) return -paintLossForBot;
+
+        if (paintType.isEnemy()) return -paintLossForBot;
+        if (!isEnemyPaintNear && paintType == PaintType.EMPTY) return 0;
 
         return 1;
     }
-
-
-    boolean isBetterMove(MicroInfoSplasher M)
+    boolean isBetterMoveThan(MicroInfoMopper M)
     {
         if (safe() < M.safe()) return false;
         if (safe() > M.safe()) return true;
@@ -100,9 +96,15 @@ public class MicroInfoSplasher {
             if (minDistToTower > M.minDistToTower) return true;
         }
 
-        //if (dir == Direction.CENTER) return false;
-        //if (M.dir == Direction.CENTER) return true;
+        if (!isEnemyPaintNear && M.isEnemyPaintNear) return false;
+        if (!M.isEnemyPaintNear && isEnemyPaintNear) return true;
 
-        return minDistToEnemy < M.minDistToEnemy;
+        if (!isEnemyPaintWithMarkNear && M.isEnemyPaintWithMarkNear) return false;
+        if (!M.isEnemyPaintWithMarkNear && isEnemyPaintWithMarkNear) return true;
+        
+        if (dir == Direction.CENTER) return false;
+        if (M.dir == Direction.CENTER) return true;
+
+        return false;
     }
 }

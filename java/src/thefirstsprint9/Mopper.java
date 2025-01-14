@@ -1,4 +1,4 @@
-package bloonsTowerDefense9;
+package thefirstsprint9;
 
 /*
 Moppers are frail and cheap in paint but expensive in chips. They're main purpose is to steal paint from the enemy, whether it is
@@ -13,7 +13,6 @@ public class Mopper extends Globals
 {
     public static void run() throws GameActionException {
         canMove = true;
-        earlyGameLinger();
         Micro.tryCompleteTowerPattern();
         Micro.refuel();
         Micro.mopperMicro();
@@ -30,13 +29,6 @@ public class Mopper extends Globals
             Nav.explore();
             //Nav.explore();
         }
-    }
-
-    public static void earlyGameLinger() throws GameActionException {
-        if (rc.getRoundNum() > 100) return;
-        RobotInfo[] nearEnemies = rc.senseNearbyRobots(-1, opponentTeam);
-        if (nearEnemies.length == 0) return;
-        Nav.moveToward(nearEnemies[0].getLocation());
     }
 
     public static void mopTiles() throws GameActionException {

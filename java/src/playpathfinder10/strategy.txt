@@ -1,0 +1,20 @@
+This will be the first major update since Sprint 1. It will be focused on revising the pathfinding program. It should
+work as follows:
+
+https://github.com/battlecode/battlecode25-lectureplayer/blob/main/java/src/lectureplayer/RobotPlayer.java
+Standard Bug Nav 2 with the following additions:
+* ROBOT_WALL percent chance to treat robots as walls
+* aggro boolean. If true,
+    - Paint is not considered a wall in any case (overrides other rules)
+* careful boolean. If true,
+    - treat enemy paint as walls if there's an adjacent non-enemy tile to us
+    - treat neutral paint as walls if there's an adjacent allied tile to us
+* Extra rules per bot type
+    - SOLDIER
+        * Treat enemy paint as walls
+        * If the next tile is neutral, paint it or wait to paint it
+    - MOPPER
+        * If the next tile is enemy, mop it or wait to mop it
+    - SPLASHER
+        * careful = true
+

@@ -1,4 +1,4 @@
-package bloonsTowerDefense9;
+package thefirstsprint9;
 
 
 /*
@@ -16,12 +16,12 @@ public class Soldier extends Globals {
 
     public static void run() throws GameActionException {
         canMove = true;
-        earlyGameLinger();
         Micro.tryCompleteTowerPattern();
         Micro.refuel();
 
-        Micro.soldierMicro();
         paintRuins();
+        Micro.soldierMicro();
+
 
 
 
@@ -32,23 +32,12 @@ public class Soldier extends Globals {
         }
     }
 
-    public static void earlyGameLinger() throws GameActionException {
-        if (rc.getRoundNum() > 100) return;
-        RobotInfo[] nearEnemies = rc.senseNearbyRobots(-1, opponentTeam);
-        if (nearEnemies.length == 0) return;
-        Nav.moveToward(nearEnemies[0].getLocation());
-    }
-
     public static void paintRuins() throws GameActionException {
         if (rc.getPaint() < 5 || rc.getNumberTowers() >= GameConstants.MAX_NUMBER_OF_TOWERS)
         {
             return;
         }
         MapLocation[] ruins = rc.senseNearbyRuins(-1);
-        if (ruins.length == 0)
-        {
-            return;
-        }
         Logger.addToIndicatorString("RUINS SEEN");
         // Go towards ruins that can be completed
         int minDist = 9999;
@@ -63,14 +52,11 @@ public class Soldier extends Globals {
             {
                 minDist = dist;
                 targetRuin = ruins[i];
-                /*
                 if (r != null && r.getType().isTowerType() && r.getTeam() == myTeam)
                 {
                     isTargetRuinMarkable = false;
                     continue;
                 }
-
-                 */
                 MapInfo[] nearMapInfos = rc.senseNearbyMapInfos(targetRuin, 2);
                 for (int j = 0; j < nearMapInfos.length; j++)
                 {
@@ -89,26 +75,44 @@ public class Soldier extends Globals {
         }
         if (targetRuin != null) Logger.addToIndicatorString(String.valueOf(targetRuin));
         else Logger.addToIndicatorString("Null");
-        if (targetRuin != null && rc.getMoney() >= UnitType.LEVEL_ONE_MONEY_TOWER.moneyCost)
+        if (targetRuin != null && rc.senseRobotAtLocation(targetRuin) == null) //
         {
-            if (rc.senseRobotAtLocation(targetRuin) == null) {
-                UnitType towerType = Micro.towerPatternToComplete(targetRuin, true);
-                if (towerType != null) {
-                    if (towerType != UnitType.LEVEL_ONE_MONEY_TOWER || rc.getMoney() < 3000 && rc.getRoundNum() > 70) {
+            UnitType towerType = Micro.towerPatternToComplete(targetRuin, true);
+            if (towerType != null) {
+                if (rc.getMoney() >= towerType.moneyCost) {
+                    if (towerType != UnitType.LEVEL_ONE_MONEY_TOWER || rc.getMoney() < 3000) {
                         if (targetRuin.isAdjacentTo(rc.getLocation())) {
                             if (rc.canCompleteTowerPattern(towerType, targetRuin)) {
-                                Logger.addToIndicatorString(towerType + " " + targetRuin);
                                 rc.completeTowerPattern(towerType, targetRuin);
+                                Logger.addToIndicatorString(towerType + " " + targetRuin);
                             }
                         } else if (targetRuin.isWithinDistanceSquared(rc.getLocation(), 8)) {
                             Nav.moveToward(targetRuin);
                             if (targetRuin.isAdjacentTo(rc.getLocation())) {
                                 if (rc.canCompleteTowerPattern(towerType, targetRuin)) {
-                                    Logger.addToIndicatorString(towerType + " " + targetRuin);
                                     rc.completeTowerPattern(towerType, targetRuin);
+                                    Logger.addToIndicatorString(towerType + " " + targetRuin);
                                 }
                             }
                         }
+                    }
+                }
+                else
+                {
+                    //If there are no allied soldiers near the ruin, stay near the ruin
+                    RobotInfo[] nearAllies = rc.senseNearbyRobots(targetRuin, 8, myTeam);
+                    boolean soldierNear = false;
+                    for (int i = 0; i < nearAllies.length; i++)
+                    {
+                        if (nearAllies[i].getType() == UnitType.SOLDIER)
+                        {
+                            soldierNear = true;
+                            break;
+                        }
+                    }
+                    if (!soldierNear && rc.getLocation().isWithinDistanceSquared(targetRuin, 10)) //TODO
+                    {
+                        Nav.moveToward(targetRuin);
                     }
                 }
             }
@@ -131,6 +135,21 @@ public class Soldier extends Globals {
                             secondary = infos[i].getMark().isSecondary();
                             targetMark = infos[i].getMapLocation();
                         }
+                    }
+                }
+            }
+        }
+        else
+        {
+            for (int i = 0; i < infos.length; i++) {
+                int dist = rc.getLocation().distanceSquaredTo(infos[i].getMapLocation());
+                if (dist < minDist)
+                {
+                    if (infos[i].getMark().isAlly() && !infos[i].getPaint().equals(infos[i].getMark()) && !infos[i].getPaint().isEnemy())
+                    {
+                        minDist = dist;
+                        secondary = infos[i].getMark().isSecondary();
+                        targetMark = infos[i].getMapLocation();
                     }
                 }
             }

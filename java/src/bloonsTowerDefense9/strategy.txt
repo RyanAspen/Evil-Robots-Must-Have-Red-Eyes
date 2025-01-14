@@ -1,7 +1,0 @@
-Last update turned out to be just bug fixes. This time for real
-
-The counter strategy is as follows:
-- Each tower spawns a soldier ASAP
-- The soldier starts by marking its spawn tower with the correct pattern.
-- When an enemy is seen by a starting tower, spawn a mopper as close as possible to the enemy as well as a soldier.
-- The existing code should do the rest (pressure the attackers as much as possible and rebuild towers destroyed by the aggressors)

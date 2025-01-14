@@ -1,0 +1,5 @@
+After the failures of the previous v9, this is meant to add final changes before the sprint 1 tournament. Main changes are
+- Make sure soldiers and moppers always go for marks when they should (DONE, I think)
+- Build 2 soldiers per tower at the beginning (DONE)
+- Build up towers as quickly as possible (Maybe have a soldier stay near a completed tower pattern to build as soon as the gold is ready) (DONE)
+- Army make-up testing (0.4 Soldiers, 0.5 Moppers, and 0.1 splashers seems best atm)

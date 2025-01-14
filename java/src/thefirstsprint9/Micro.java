@@ -1,4 +1,4 @@
-package bloonsTowerDefense9;
+package thefirstsprint9;
 
 /*
     Micro methods that apply to any bot should be included here. This includes
@@ -154,7 +154,6 @@ public class Micro extends Globals {
             UnitType towerType = towerPatternToComplete(ruins[i],true);
             if (towerType != null)
             {
-                if (towerType == UnitType.LEVEL_ONE_MONEY_TOWER && rc.getRoundNum() < 70) continue;
                 if (rc.getLocation().isWithinDistanceSquared(ruins[i],2))
                 {
                     if (rc.canCompleteTowerPattern(towerType, ruins[i]))
@@ -172,6 +171,18 @@ public class Micro extends Globals {
                     }
                     return;
                 }
+            }
+
+
+            else if (rc.canCompleteTowerPattern(UnitType.LEVEL_ONE_PAINT_TOWER, ruins[i]))
+            {
+                rc.completeTowerPattern(UnitType.LEVEL_ONE_PAINT_TOWER, ruins[i]);
+                return;
+            }
+            else if (rc.canCompleteTowerPattern(UnitType.LEVEL_ONE_DEFENSE_TOWER, ruins[i]))
+            {
+                rc.completeTowerPattern(UnitType.LEVEL_ONE_DEFENSE_TOWER, ruins[i]);
+                return;
             }
         }
 

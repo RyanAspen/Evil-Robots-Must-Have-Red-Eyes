@@ -1,4 +1,4 @@
-package bloonsTowerDefense9;
+package playpathfinder10;
 import battlecode.common.*;
 /*
 Towers are stationary. They can do 2 things:
@@ -32,7 +32,6 @@ public class Tower extends Globals
     public static final int PAINT_TO_SAVE_BUILD = UnitType.LEVEL_ONE_PAINT_TOWER.paintCost;
     public static final int MONEY_TO_SAVE_BUILD = UnitType.LEVEL_ONE_PAINT_TOWER.moneyCost;
 
-    public static boolean protect = false;
     public static void replaceWith(UnitType type) throws GameActionException {
 
         if (rc.senseNearbyRobots(-1,opponentTeam).length > 0) return;
@@ -52,6 +51,20 @@ public class Tower extends Globals
         rc.disintegrate();
     }
 
+    public static void paintForGold() throws GameActionException {
+        if (rc.getMoney() < 3000) return;
+        if (rc.senseNearbyRobots(-1, opponentTeam).length > 0) return;
+        UnitType patternAroundTower = Micro.towerPatternToComplete(location, true);
+        if (patternAroundTower == null) return;
+        if (rc.getPaint() >= UnitType.SOLDIER.paintCost && rc.getMoney() >= UnitType.SOLDIER.moneyCost)
+        {
+            attemptSpawn(UnitType.SOLDIER);
+        }
+        else if (rc.getPaint() < UnitType.SOLDIER.paintCost)
+        {
+            rc.disintegrate();
+        }
+    }
 
     public static void init(RobotController rc) throws GameActionException {
         Globals.init(rc);
@@ -240,7 +253,7 @@ public class Tower extends Globals
         {
             attemptSpawn(UnitType.SOLDIER);
         }
-        if (rc.getRoundNum() == 2 && rc.getType() == UnitType.LEVEL_ONE_PAINT_TOWER)
+        if (rc.getRoundNum() == 2)
         {
             attemptSpawn(UnitType.MOPPER);
         }
@@ -249,11 +262,14 @@ public class Tower extends Globals
             attemptSpawn(UnitType.SOLDIER);
         }
 
+
+
+        //paintForGold(); //PURE GOLD STRAT
         //defend();
 
 
-        if (rc.getType().getBaseType() == UnitType.LEVEL_ONE_MONEY_TOWER && rc.getMoney() > 3000 && rc.getNumberTowers() > 20 ) replaceWith(null);
-        if (rc.getType().getBaseType() == UnitType.LEVEL_ONE_MONEY_TOWER && rc.getMoney() > 5000) replaceWith(UnitType.LEVEL_ONE_PAINT_TOWER);
+        if ((rc.getType() == UnitType.LEVEL_ONE_MONEY_TOWER || rc.getType() == UnitType.LEVEL_TWO_MONEY_TOWER || rc.getType() == UnitType.LEVEL_THREE_MONEY_TOWER) && rc.getMoney() > 3000 && rc.getNumberTowers() > 20 ) replaceWith(null);
+        if ((rc.getType() == UnitType.LEVEL_ONE_MONEY_TOWER || rc.getType() == UnitType.LEVEL_TWO_MONEY_TOWER || rc.getType() == UnitType.LEVEL_THREE_MONEY_TOWER) && rc.getMoney() > 5000) replaceWith(UnitType.LEVEL_ONE_PAINT_TOWER);
 
         //Too overzealous
         //if ((rc.getType() == UnitType.LEVEL_ONE_PAINT_TOWER || rc.getType() == UnitType.LEVEL_TWO_PAINT_TOWER || rc.getType() == UnitType.LEVEL_THREE_PAINT_TOWER) && rc.getNumberTowers() > 20 && rc.senseNearbyRobots(-1).length==0) rc.disintegrate();

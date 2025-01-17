@@ -1,0 +1,14 @@
+Balance patches for Sprint 1 just came out. Major notes:
+- Comms got much better. Look into this asap.
+- Clustering is really dangerous now (update micro and pathfinding)
+- Mop swinging is now much better (again, update micro)
+- Defense towers are buffed (already kind of accounted for this, but check anyway)
+- SRP should be overhauled (current code is functional, but idk)
+
+There's too much to go over now, so this update will be focused on redoing micro
+to account for clustering changes, incorporating mop swinging, and changing pathfinding
+to account for clustering.
+
+Note:
+Because bytecode is becoming a problem, try to optimize bytecode more and specify more constants for maximum bytecode
+allocation for micro and other methods.

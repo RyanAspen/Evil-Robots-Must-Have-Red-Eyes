@@ -1,6 +1,7 @@
-package playpathfinder10;
+package improviseadaptovercome11;
 
-import battlecode.common.*;
+import battlecode.common.GameActionException;
+import battlecode.common.MapLocation;
 
 public class Nav extends Globals {
 

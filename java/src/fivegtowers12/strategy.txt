@@ -1,0 +1,26 @@
+Previous attempt at v12 failed. Now the focus is on new tower strats.
+This means:
+- Each tower has a % chance to try to build a unit, where that chance
+is max(100-2r, 100/t), where r is the # of rounds since an enemy was seen
+and t is the number of friendly towers on the field.
+- A tower can destroy itself IF
+    * the pattern to rebuild is already set AND a soldier is nearby AND we have enough gold AND the tower doesn't have much paint and can't regain it
+    *
+- A tower can try to replace itself as follows:
+    * When certain conditions are met, the tower sends a message to
+    a soldier to re-mark the tower with the desired pattern.
+    * Once the new pattern is ready, destroy the old tower.
+- A defense tower replaces itself if it hasn't seen an enemy in at
+least 100 rounds
+- A gold tower replaces itself if we have at least 20 towers already
+
+Things learned from scrimmages:
+- Splasher rushes are very good at stalling enemies
+- Moppers should always try to mop and they shouldn't move if they are
+already within mopping range.
+- Soldiers should create a path before taking it.
+- Temporarily move to safety function should be added to move to the
+lowest paint loss area.
+- Soldiers in the early stages of the game will often destroy themselves
+attempting to complete a tower pattern when they can go back to their spawns
+to get paint. Figure out retreat code (are paint towers necessary? there's usually some paint in the spawn towers)

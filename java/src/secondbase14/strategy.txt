@@ -1,0 +1,12 @@
+Ideally, this is the last version before the Sprint 2 deadline. The
+changes for this version are as follows:
+- Towers should try to spawn a mopper if they see enemy paint (DONE)
+- Fix soldier micro against towers to be simpler and more aggro towards
+towers. (DONE)
+- Have some soldiers explicitly seek out and destroy enemy towers
+(ignore movement micro entirely) (Ignoring for now)
+- Increase probability of paint towers after first few rounds
+- Make splasher movement micro more aggressive (more willing to enter
+enemy territory)
+- Improve SRP creation (4x4, move to complete SRPs more aggressively,
+allocate more resources towards SRPs)

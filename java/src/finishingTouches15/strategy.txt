@@ -1,0 +1,5 @@
+Ok, just one more version maybe. Possible changes:
+- Fix moppers to stop trying to get close to towers (DONE)
+- Improve SRPs (DONE)
+
+Let's see how it does

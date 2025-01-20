@@ -1,0 +1,53 @@
+This was implemented a bit in the last version, but now let's add
+the ability for each bot to remember some info about where it's been
+to add some semblance of macro. Use KnowledgeBase. Make sure bytecode is all
+good.
+
+Also, reevaluate bot spawning and the roles of each bot.
+- Splashers should be utilized more. In the early game, they're great
+tower disruptors. In the mid-to-late game, they are the best robot
+for making offensive progress. Because of this, paint towers need to
+be prioritized more than they currently are.
+    * PRIORITIES
+        * Paint over as many contested tiles as possible, and make
+        special effort to disrupt towers.
+        * Splashers should not attack if they aren't near enemies tiles
+        or enemy units.
+        * Can be the greediest when it comes to refilling paint.
+    * Should be spawned by paint towers whenever possible.
+- Moppers are meant to be used primarily to weaken enemy robots. They
+should work independently and leech off of enemy units. They can also
+halt offensive momentum for enemies by destroying progress.
+    * PRIORITIES
+        * Go towards large groups of enemies and mop or mop sweep enemies
+        * If no enemies are nearby and there are allies nearby, try to
+        mop enemy tiles. If an ally is below 20% of their paint capacity,
+        try to give paint to them.
+        * Should try to stay above 75 paint whenever possible.
+    * Should occassionally be spawned by front-line towers to assist
+    splashers and soldiers
+- Soldiers are essential for building a defensive economic presence,
+since they are the only bot capable of consistently creating patterns.
+They are also the best at destroying towers. They can paint the most
+efficiently, but they aren't especially useful in a robot-vs-robot
+fight.
+    * PRIORITIES
+        * Mark and complete tower patterns
+        * Attack enemy towers
+        * Attack empty tiles
+        * Create SRPs
+        * They shouldn't need much paint for refilling
+    * Should be the first things spawned by the towers in the early game.
+    Each new tower should try to spawn a few of them. After a while, new soldiers
+    should be kept at a minimum
+
+Front-line heuristic:
+- A tower is considered "front-line" if it has seen enemy units in the last 50 turns.
+- Otherwise, it is "back-line".
+- "front-line" towers should build more units, especially splashers
+- "back-line" towers shouldn't build too many units except a few soldiers
+- Once the capability is there, "front-line" towers should mainly be
+defense or paint towers. "back-line" towers should mainly be gold towers.
+
+Contested Zone heuristic:
+- An area is "contested" if there are enemies nearby.
